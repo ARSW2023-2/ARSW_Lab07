@@ -71,6 +71,23 @@ app = (function(){
     };
 
     var innerAPIModule = {
+        init: function(){
+
+            var canvas = document.getElementById("mycanvas");
+            var context = canvas.getContext("2d");
+
+            if(window.PointerEvent) {
+                canvas.addEventListener("pointerdown", function(event){
+                    alert('pointerdown at '+event.pageX+','+event.pageY);   
+                });
+            }else{
+                canvas.addEventListener("mousedown", function(event){
+                    alert('mousedown at '+event.clientX+','+event.clientY);  
+          
+                });
+            }
+        },
+        
         getAuthorBlueprints: function(){
             let author = $("#author-name").val();
             apiclient.getBlueprintsByAuthor(author, (req, resp) => {
