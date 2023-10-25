@@ -1,17 +1,19 @@
 app = (function(){
 
-    let _author;
-    let _blueprints;
+    let _author = "";
+    let _blueprintName = "";
+    let _blueprints = [];
 
     var _refreshAuthorState = function (author, blueprintObjects) {
         
         _author = author;
         _blueprints = blueprintObjects.map((blueprint) => {
-            return { name: blueprint.name, puntos: blueprint.points.length }
+            return { name: blueprint.name, puntos: blueprint.points.length, points:blueprint.points}
         });
 
         if (author === "" || author == null) {
             alert("¡Debe poner un nombre en el buscador!");
+            return;
         } else {
             $("#result-name").text(author + "'s Blueprints:");
         }
@@ -41,6 +43,8 @@ app = (function(){
 
     var _printCanvas = function(blueprintModel) {
         $("#actual-name").text("Current blueprint: " + blueprintModel.name);
+        _blueprintName = blueprintModel.name;
+        console.log(blueprintModel);
         const puntos = blueprintModel.points;
         var c = document.getElementById("myCanvas");
         var ctx = c.getContext("2d");
@@ -70,7 +74,32 @@ app = (function(){
         }
     };
 
+    const agregarPuntos = function (event){
+        let blueprintPoints;
+        for (let bp of _blueprints){
+            console.log(bp.name);
+            console.log(_blueprintName);
+            if (bp.name == _blueprintName){
+                bp.points.push( { x: event.offsetX , y: event.offsetY});
+                console.log(blueprintPoints);
+                _printCanvas(bp);
+            }
+        }
+    };
+
     var innerAPIModule = {
+        init: function(){
+
+            var canvas = document.getElementById("myCanvas");
+            var context = canvas.getContext("2d");
+
+            if(window.PointerEvent) {
+                canvas.addEventListener("pointerdown", agregarPuntos, function(event){});
+            }else{
+                canvas.addEventListener("mousedown", agregarPuntos, function(event){});
+            }
+        },
+        
         getAuthorBlueprints: function(){
             let author = $("#author-name").val();
             apiclient.getBlueprintsByAuthor(author, (req, resp) => {
@@ -82,6 +111,22 @@ app = (function(){
             let author = $("#author-name").val();
             apiclient.getBlueprintsByNameAndAuthor(author, blueprintDOM.id, (req, resp) => {
                 _printCanvas(resp);
+            });
+        },
+
+        updateBlueprint: function(){
+            let author = $("#author-name").val();
+            let blueprintName = _blueprintName;
+            let points = [];
+            for (let bp of _blueprints){
+                if (bp.name == blueprintName){
+                    points = bp.points;
+                }
+            }
+            apiclient.putBlueprintsByNameAndAuthor(author, blueprintName, points, (req, resp) => {
+                const data ={ id: blueprintName, points: points}
+                this.printBlueprint(data);
+                this.getAuthorBlueprints();
             });
         }
     };

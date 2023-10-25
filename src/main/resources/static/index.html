@@ -13,7 +13,7 @@
           href="/webjars/bootstrap/5.3.2/css/bootstrap.min.css" />
         <link rel="stylesheet" href="./style/estilo.css">
     </head>
-    <body>
+    <body onload="app.init()">
         <div id="search-box">
             <p><h1>Blueprints</h1></p>
             <form id="author-blueprints">
@@ -40,6 +40,8 @@
                 <a class="actual-name" id="actual-name">Current Blueprint:</a>
             </div>
             <canvas width='400px' height='400px' id="myCanvas"></canvas>
+            <br>
+            <input type="button" onclick="app.updateBlueprint()" value="Save/Update" class="greenButton" />
         </div>
         </div>
     </body>
