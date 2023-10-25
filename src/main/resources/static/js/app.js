@@ -112,6 +112,22 @@ app = (function(){
             apiclient.getBlueprintsByNameAndAuthor(author, blueprintDOM.id, (req, resp) => {
                 _printCanvas(resp);
             });
+        },
+
+        updateBlueprint: function(){
+            let author = $("#author-name").val();
+            let blueprintName = _blueprintName;
+            let points = [];
+            for (let bp of _blueprints){
+                if (bp.name == blueprintName){
+                    points = bp.points;
+                }
+            }
+            apiclient.putBlueprintsByNameAndAuthor(author, blueprintName, points, (req, resp) => {
+                const data ={ id: blueprintName, points: points}
+                this.printBlueprint(data);
+                this.getAuthorBlueprints();
+            });
         }
     };
 
