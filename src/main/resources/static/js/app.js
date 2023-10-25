@@ -73,7 +73,7 @@ app = (function(){
     var innerAPIModule = {
         init: function(){
 
-            var canvas = document.getElementById("mycanvas");
+            var canvas = document.getElementById("myCanvas");
             var context = canvas.getContext("2d");
 
             if(window.PointerEvent) {
