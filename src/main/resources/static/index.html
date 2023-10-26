@@ -36,12 +36,16 @@
             <h3 id="result-total-points">Total user points:</h3>
         </div>
         <div class="contenedor">
+            <input type="button" onclick="app.createBlueprint()" value="Create new Blueprint" class="redButton"/>
+            <br>
+            <br>
             <div class="contenedor-nombre">
                 <a class="actual-name" id="actual-name">Current Blueprint:</a>
             </div>
             <canvas width='400px' height='400px' id="myCanvas"></canvas>
             <br>
             <input type="button" onclick="app.updateBlueprint()" value="Save/Update" class="greenButton" />
+            <input type="button" onclick="app.deleteBlueprint()" value="Delete" class="pinkButton"/>
         </div>
         </div>
     </body>
