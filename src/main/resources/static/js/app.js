@@ -62,6 +62,15 @@ app = (function(){
         ctx.stroke();
     };
 
+    var _clearCanvas = function() {
+        var c = document.getElementById("myCanvas");
+        var ctx = c.getContext("2d");
+        ctx.clearRect(0, 0, c.width, c.height);
+        ctx.restore();
+        ctx.beginPath();
+        ctx.stroke();
+    };
+
     var innerMockModule = {
         getAuthorBlueprints: function () {
             let author = $("#author-name").val();
@@ -128,6 +137,31 @@ app = (function(){
                 this.printBlueprint(data);
                 this.getAuthorBlueprints();
             });
+        },
+
+        createBlueprint: function(){
+            if(_author==""){
+                alert("¡Debe buscar un autor!");
+                return;
+            }
+            _clearCanvas();
+            let blueprintName =  prompt("Ingrese el nombre del nuevo plano");
+            if (blueprintName == null || blueprintName == "") {
+                alert("¡Debe ingresar un nombre!");
+                return;
+            }
+            let points = [];
+            for (let bp of _blueprints){
+                if (bp.name == blueprintName){
+                    alert("¡El nombre del plano ya existe!");
+                    return;
+                }
+            }
+            //llamar al api
+            apiclient.createNewBlueprint(_author, blueprintName, points, (req, resp) => {
+                this.getAuthorBlueprints();
+            }
+            );
         }
     };
 
