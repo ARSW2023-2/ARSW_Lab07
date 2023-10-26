@@ -160,9 +160,25 @@ app = (function(){
             //llamar al api
             apiclient.createNewBlueprint(_author, blueprintName, points, (req, resp) => {
                 this.getAuthorBlueprints();
+            });
+        },
+
+        deleteBlueprint: function(){
+            if(_author==""){
+                alert("¡Debe buscar un autor!");
+                return;
             }
-            );
-        }
+            let blueprintName = _blueprintName;
+            if (blueprintName == null || blueprintName == "") {
+                alert("¡Debe abrir un plano!");
+                return;
+            }
+
+            apiclient.deleteBlueprint(_author, blueprintName, (req, resp) => {
+                this.getAuthorBlueprints();
+                _clearCanvas();
+            }            
+            );}
     };
 
     //return innerMockModule;
