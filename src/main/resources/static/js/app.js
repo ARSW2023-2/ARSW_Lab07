@@ -1,17 +1,19 @@
 app = (function(){
 
-    let _author;
-    let _blueprints;
+    let _author = "";
+    let _blueprintName = "";
+    let _blueprints = [];
 
     var _refreshAuthorState = function (author, blueprintObjects) {
         
         _author = author;
         _blueprints = blueprintObjects.map((blueprint) => {
-            return { name: blueprint.name, puntos: blueprint.points.length }
+            return { name: blueprint.name, puntos: blueprint.points.length, points:blueprint.points}
         });
 
         if (author === "" || author == null) {
             alert("¡Debe poner un nombre en el buscador!");
+            return;
         } else {
             $("#result-name").text(author + "'s Blueprints:");
         }
@@ -41,6 +43,8 @@ app = (function(){
 
     var _printCanvas = function(blueprintModel) {
         $("#actual-name").text("Current blueprint: " + blueprintModel.name);
+        _blueprintName = blueprintModel.name;
+        console.log(blueprintModel);
         const puntos = blueprintModel.points;
         var c = document.getElementById("myCanvas");
         var ctx = c.getContext("2d");
@@ -58,6 +62,15 @@ app = (function(){
         ctx.stroke();
     };
 
+    var _clearCanvas = function() {
+        var c = document.getElementById("myCanvas");
+        var ctx = c.getContext("2d");
+        ctx.clearRect(0, 0, c.width, c.height);
+        ctx.restore();
+        ctx.beginPath();
+        ctx.stroke();
+    };
+
     var innerMockModule = {
         getAuthorBlueprints: function () {
             let author = $("#author-name").val();
@@ -70,7 +83,32 @@ app = (function(){
         }
     };
 
+    const agregarPuntos = function (event){
+        let blueprintPoints;
+        for (let bp of _blueprints){
+            console.log(bp.name);
+            console.log(_blueprintName);
+            if (bp.name == _blueprintName){
+                bp.points.push( { x: event.offsetX , y: event.offsetY});
+                console.log(blueprintPoints);
+                _printCanvas(bp);
+            }
+        }
+    };
+
     var innerAPIModule = {
+        init: function(){
+
+            var canvas = document.getElementById("myCanvas");
+            var context = canvas.getContext("2d");
+
+            if(window.PointerEvent) {
+                canvas.addEventListener("pointerdown", agregarPuntos, function(event){});
+            }else{
+                canvas.addEventListener("mousedown", agregarPuntos, function(event){});
+            }
+        },
+        
         getAuthorBlueprints: function(){
             let author = $("#author-name").val();
             apiclient.getBlueprintsByAuthor(author, (req, resp) => {
@@ -83,7 +121,64 @@ app = (function(){
             apiclient.getBlueprintsByNameAndAuthor(author, blueprintDOM.id, (req, resp) => {
                 _printCanvas(resp);
             });
-        }
+        },
+
+        updateBlueprint: function(){
+            let author = $("#author-name").val();
+            let blueprintName = _blueprintName;
+            let points = [];
+            for (let bp of _blueprints){
+                if (bp.name == blueprintName){
+                    points = bp.points;
+                }
+            }
+            apiclient.putBlueprintsByNameAndAuthor(author, blueprintName, points, (req, resp) => {
+                const data ={ id: blueprintName, points: points}
+                this.printBlueprint(data);
+                this.getAuthorBlueprints();
+            });
+        },
+
+        createBlueprint: function(){
+            if(_author==""){
+                alert("¡Debe buscar un autor!");
+                return;
+            }
+            _clearCanvas();
+            let blueprintName =  prompt("Ingrese el nombre del nuevo plano");
+            if (blueprintName == null || blueprintName == "") {
+                alert("¡Debe ingresar un nombre!");
+                return;
+            }
+            let points = [];
+            for (let bp of _blueprints){
+                if (bp.name == blueprintName){
+                    alert("¡El nombre del plano ya existe!");
+                    return;
+                }
+            }
+            //llamar al api
+            apiclient.createNewBlueprint(_author, blueprintName, points, (req, resp) => {
+                this.getAuthorBlueprints();
+            });
+        },
+
+        deleteBlueprint: function(){
+            if(_author==""){
+                alert("¡Debe buscar un autor!");
+                return;
+            }
+            let blueprintName = _blueprintName;
+            if (blueprintName == null || blueprintName == "") {
+                alert("¡Debe abrir un plano!");
+                return;
+            }
+
+            apiclient.deleteBlueprint(_author, blueprintName, (req, resp) => {
+                this.getAuthorBlueprints();
+                _clearCanvas();
+            }            
+            );}
     };
 
     //return innerMockModule;
